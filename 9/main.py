@@ -97,9 +97,37 @@ def calc_basin_size(i,j):
     # queue structure?
     # 9 is never part of a basin
 
+    queue = [[ i,j ]]
 
+    def mark_point(i,j):
+        graph_copy[i][j] = None
+
+    total = 1
+
+    while queue:
+        point = queue.pop()
+        point_val = graph_copy[point[0]][point[1]]
+        mark_point(point[0], point[1])
+        neighbours = look_around(point[0], point[1], graph_copy)
+        for n in neighbours:
+            neighbour_val = graph_copy[n[0]][n[1]]
+            if point_val and neighbour_val and neighbour_val != 9 and neighbour_val >= point_val:
+                total += 1
+                queue.append(n)
+    
+    return total
+
+
+
+basin_sizes = []
 for lpc in low_point_cord:
-    basin = calc_basin_size(lpc[0], lpc[1])
+    basin_size = calc_basin_size(lpc[0], lpc[1])
+    basin_sizes.append(basin_size)
+
+basin_sizes.sort(reverse=True)
 
 
 print('pt2')
+print(basin_sizes[:10])
+print(reduce((lambda curr, next: curr * next),basin_sizes[:3]))
+
