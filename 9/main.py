@@ -28,9 +28,8 @@ for s in txt_inputs:
     graph.append(x)
 
 
-
 # return all valid neighbours of point i j on graph
-def look_around(i, j, graph):
+def get_neighbours(i, j, graph):
     neighbours = []
     n = len(graph)
     d = len(graph[0])
@@ -48,7 +47,7 @@ def look_around(i, j, graph):
     # change j 
     for p in possibilities:
         new = j + p
-        if new < 0 or new >=n:
+        if new < 0 or new >=d:
             continue
         neighbours.append([i, new])
         
@@ -65,7 +64,7 @@ low_point_cord = []
 for i in range(n):
     for j in range(d):
         cur_val = graph[i][j]
-        neighbours = look_around(i,j, graph)
+        neighbours = get_neighbours(i,j, graph)
 
         is_smallest = True
         for n in neighbours:
@@ -97,23 +96,27 @@ def calc_basin_size(i,j):
     # queue structure?
     # 9 is never part of a basin
 
-    queue = [[ i,j ]]
+    queue = [[i,j]]
 
     def mark_point(i,j):
         graph_copy[i][j] = None
 
-    total = 1
+    total = 0
 
-    while queue:
+    while len(queue) > 0:
         point = queue.pop()
         point_val = graph_copy[point[0]][point[1]]
-        mark_point(point[0], point[1])
-        neighbours = look_around(point[0], point[1], graph_copy)
-        for n in neighbours:
-            neighbour_val = graph_copy[n[0]][n[1]]
-            if point_val and neighbour_val and neighbour_val != 9 and neighbour_val >= point_val:
-                total += 1
-                queue.append(n)
+        # point has already been seen do not count
+        if point_val == None:
+            continue
+        else:
+            total += 1
+            mark_point(point[0], point[1])
+            neighbours = get_neighbours(point[0], point[1], graph_copy)
+            for n in neighbours:
+                val = graph_copy[n[0]][n[1]]
+                if val and val < 9 and val >= point_val:
+                    queue.append(n)
     
     return total
 
@@ -122,6 +125,7 @@ def calc_basin_size(i,j):
 basin_sizes = []
 for lpc in low_point_cord:
     basin_size = calc_basin_size(lpc[0], lpc[1])
+    print(basin_size, lpc)
     basin_sizes.append(basin_size)
 
 basin_sizes.sort(reverse=True)
